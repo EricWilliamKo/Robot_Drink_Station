@@ -5,16 +5,24 @@ import os.path
 import cherrypy
 import json
 import time
+from Drinks import Drink
 
 class RobotStationServer():
+    orderList = []
 
     @cherrypy.expose
     def index(self):
-        return 'hello world'
+        return 'welcome to virtuoso robot drink station'
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
     def order(self):
-        return 'order status'
+        orderdata = cherrypy.request.json
+        for drinkinfo in orderdata['orderList']:
+            drink = Drink(**orderdata)
+            self.orderList.append(drink)
+
+        return 'order recivied'
 
 severconf = os.path.join(os.path.dirname(__file__), 'cherrypy.conf')
 
