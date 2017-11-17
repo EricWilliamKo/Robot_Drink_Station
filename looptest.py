@@ -6,21 +6,23 @@ def dijkstra(edges, f, t):
     g = defaultdict(list)
     for l,r,c in edges:
         g[l].append((c,r))
-    # pathBuf = list()
-    # q, seen = [(0,f,pathBuf)], set()
-    q, seen = [(0,f,())], set()
+    pathBuf = list()
+    q, seen = [(0,f,pathBuf)], set()
+    # q, seen = [(0,f,())], set()
     while q:
         # path = []
         (cost,v1,path) = heappop(q)
         if v1 not in seen:
             seen.add(v1)
-            # path.append(v1)
-            path = (v1,path)
+            path.append(v1)
+            # path = (v1,path)
             if v1 == t: return (cost, path)
 
             for c, v2 in g.get(v1, ()):
                 if v2 not in seen:
-                    heappush(q, (cost+c, v2, path))
+                    path2 = path[0:]
+                    heappush(q, (cost+c, v2, path2))
+                    path2 = []
 
     return float("inf")
 
@@ -52,6 +54,6 @@ if __name__ == "__main__":
 
     print "=== Dijkstra ==="
     (cost, path) = dijkstra(edges, 'S5', 'S5I')
-    # print dijkstra(edges, 'S5', 'S5I')
-    dicpath = tupleToDic(path)
-    print dicpath
+    print dijkstra(edges, 'S5', 'S5I')
+    # dicpath = tupleToDic(path)
+    # print dicpath
