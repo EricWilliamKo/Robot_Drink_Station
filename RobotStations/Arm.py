@@ -14,6 +14,13 @@ class Arm:
         ('P6','P7',1),('P7','P8',1),
         ('P0','P1',3),('P0','P2',3),('P0','P3',3),('P0','P4',3),('P0','P5',3),('P0','P5I',3),
         ('P0','P6',3),('P0','P7',3),('P0','P8',3),
+        #reflection make every path bidirectional
+        ('P1','S1',1),('P2','S2',1),('P3','S3',1),('P4','S4',1),('P5','S5',1),('P5I','S5I',1), 
+        ('P6','L1',1),('P7','L2',1),('P8','L3',1), 
+        ('P2','P1',1),('P2','P1',1),('P3','P2',1),('P4','P3',1),('P5','P4',1), 
+        ('P7','P6',1),('P8','P7',1), 
+        ('P1','P0',3),('P2','P0',3),('P3','P0',3),('P4','P0',3), 'P5','P0',3),('P5I','P0',3), 
+        ('P6','P0',3),('P7','P0',3),('P8','P0',3)
     ]
 
     def register(self,sub):
@@ -22,43 +29,10 @@ class Arm:
     def notifyController(self,msg):
         self.subsciber(msg)
 
-    # def cupdropper_ingredients(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('ingredients reached')).start()
+    def grab():
+        return
 
-    # def cupdropper_ice(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('ice reached')).start()
-
-    # def ingredients_ice(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('ice reached')).start()
-
-    # def ice_fourseason(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('fourseason reached')).start()
-
-    # def ice_blackTea(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('black tea reached')).start()
-
-    # def fourseason_sealer(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('sealer reached')).start()
-
-    # def blackTea_sealer(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('sealer reached')).start()
+    def moveToNext(terminal):
         
-    # def sealer_locker1(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('locker 1 reached')).start()
+        
 
-    # def sealer_locker2(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('locker 2 reached')).start()
-
-    # def sealer_locker3(self):
-    #     self.armSerial.write('')
-    #     Timer(1,self.notifyController('locker 3 reached')).start()
-    

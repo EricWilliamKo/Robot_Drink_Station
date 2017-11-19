@@ -6,8 +6,9 @@ class Station:
     remain = 100
     drink = None
 
-    def __init__(self):
+    def __init__(self,stationName):
         self.subscribers = set()
+        self.stationName = stationName
     
     def register(self,notifyFunc):
         self.notifyFunc = notifyFunc
