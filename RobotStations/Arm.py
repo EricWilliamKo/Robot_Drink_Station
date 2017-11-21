@@ -1,38 +1,101 @@
 import serial
 import time
+import csv
 from threading import Timer
+from collections import defaultdict
+from heapq import *
+from Queue import *
 
 class Arm:
     armSerial = serial.Serial('/dev/arm',115200)
     position = None
     status = None
+    pathfile = open('path.csv','rb')
+    cmdfile = open('path.csv','rb')
+    workingQueue = Queue()
 
-    edges = [
-        ('S1','P1',1),('S2','P2',1),('S3','P3',1),('S4','P4',1),('S5','P5',1),('S5I','P5I',1),
-        ('L1','P6',1),('L2','P7',1),('L3','P8',1),
-        ('P1','P2',1),('P1','P2',1),('P2','P3',1),('P3','P4',1),('P4','P5',1),
-        ('P6','P7',1),('P7','P8',1),
-        ('P0','P1',3),('P0','P2',3),('P0','P3',3),('P0','P4',3),('P0','P5',3),('P0','P5I',3),
-        ('P0','P6',3),('P0','P7',3),('P0','P8',3),
-        #reflection make every path bidirectional
-        ('P1','S1',1),('P2','S2',1),('P3','S3',1),('P4','S4',1),('P5','S5',1),('P5I','S5I',1), 
-        ('P6','L1',1),('P7','L2',1),('P8','L3',1), 
-        ('P2','P1',1),('P2','P1',1),('P3','P2',1),('P4','P3',1),('P5','P4',1), 
-        ('P7','P6',1),('P8','P7',1), 
-        ('P1','P0',3),('P2','P0',3),('P3','P0',3),('P4','P0',3), 'P5','P0',3),('P5I','P0',3), 
-        ('P6','P0',3),('P7','P0',3),('P8','P0',3)
-    ]
+    def __init__(self):
+        pathfile = csv.reader(self.pathfile,dialect = 'excel')
+        cmdfile = csv.reader(self.cmdfile,dialect = 'excel')
+        pathreader = csv.reader(pathfile,dialect = 'excel')
+        cmdreader = csv.reader(cmdfile,dialect = 'excel')
+
+        #make csv dictionary
+        self.pathDic = defaultdict(list)
+        self.cmdDic = defaultdict(list)
+        for l,r,c in pathreader:
+            self.pathDic[l].append((int(c),r))
+        for pose,cmd in cmdreader:
+            self.cmdDic[pose].append(cmd)
+
+        #initialize arm pose
+        self.armSerial.write(self.cmdDic['P0'])
+        self.position = 'P0'
 
     def register(self,sub):
         self.subsciber = sub
-
+    
     def notifyController(self,msg):
         self.subsciber(msg)
 
-    def grab():
+    def moveDrink(self,start,destination):
+        if start != self.position:
+            self.moveToTarget(start)
+
+    def moveToTarget(self,targetPosition):
+        path = self.calculatePath(self.position,targetPosition)
+        for stop in path:
+            self.workingQueue.put((self.moveToNext,stop))
+
+    def moveTarget(self,destination):
+        path = self.calculatePath(self.position,destination)
+        self.workingQueue.put(self.grab,())
+        for stop in path:
+            self.workingQueue.put(self.moveToTarget,stop)
+        self.workingQueue.put(self.release,())
+            
+
+
+    def calculatePath(self,start,destination):
+        try:
+            (cost,path) = self.dijkstra(self.pathDic,start,destination)
+            print 'cost = ',cost
+            print 'path = ',path
+        except:
+            print 'path error'
+            return None
+        
+        return path
+
+    def dijkstra(self,pathdic, f, t):
+        pathBuf = list()
+        q, seen = [(0,f,pathBuf)], set()
+        while q:
+            (cost,v1,path) = heappop(q)
+            if v1 not in seen:
+                seen.add(v1)
+                path.append(v1)
+                if v1 == t: return (cost, path)
+
+                for c, v2 in pathdic.get(v1, ()):
+                    if v2 not in seen:
+                        dicpath = path[0:]
+                        heappush(q, (cost+c, v2, dicpath))
+                        dicpath = []
+
+        return float("inf")
+
+    def grab(self):
         return
 
-    def moveToNext(terminal):
+    def release(self):
+        return
+
+    def moveToNext(self,destination):
+        self.armSerial.write(self.cmdDic[destination])
+        self.position = destination
+        if not self.workingQueue.empty():
+            Timer.
         
         
 

@@ -1,5 +1,6 @@
 import time
 from threading import Timer
+import threading
 
 def print_time():
     print "From print_time", time.time()
@@ -11,4 +12,22 @@ def print_some_times():
     time.sleep(11)  # sleep while time-delay events execute
     print time.time()
 
-print_some_times()
+def moveToNext(path):
+    nextItem = path.pop(0)
+    print nextItem
+    if path == []:
+        print 'empty'
+        return
+    else:
+        t = threading.Timer(0.5,moveToNext,[path])
+        t.start()
+
+    
+
+        
+
+
+path = ['a','b','c','d']
+moveToNext(path)
+# print_some_times()
+
