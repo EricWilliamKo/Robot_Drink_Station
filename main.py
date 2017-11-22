@@ -5,13 +5,13 @@ import os.path
 import cherrypy
 import json
 import time
-from Drinks import Drink
-from Arm import Arm
+from RobotStations.Drinks import Drink
+from RobotStations.Arm import Arm
 from ProcessController import ProcessController
 
 class RobotStationServer():
     arm = Arm()
-    ProcessController = ProcessController()
+    processController = ProcessController()
     orderList = []
 
     @cherrypy.expose

@@ -1,12 +1,12 @@
 
 
-class ProcessController():
+class ProcessController:
 
     def __init__(self):
         self.waitingList = list()
         self.processingList = list()
 
-    def getorder(neworders):
+    def getorder(self,neworders):
         for drink in neworders:
             drink.manufacturingProcess.append('cupdropper')
             if drink.ingredients is not None:
@@ -16,7 +16,8 @@ class ProcessController():
             if drink.drink is not None:
                 drink.manufacturingProcess.append(drink.drink)
             drink.manufacturingProcess.append('sealer')
-            waitingList.append(drink)
+            self.waitingList.append(drink)
 
-    def fromWaitingToProcess()
+    def fromWaitingToProcess(self):
+        return
     

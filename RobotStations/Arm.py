@@ -1,3 +1,6 @@
+
+
+
 import serial
 import time
 import csv
@@ -7,30 +10,33 @@ from heapq import *
 from Queue import *
 
 class Arm:
-    armSerial = serial.Serial('/dev/arm',115200)
+    # armSerial = serial.Serial('/dev/arm',115200)
     position = None
     status = None
-    pathfile = open('path.csv','rb')
-    cmdfile = open('path.csv','rb')
-    workingQueue = Queue()
+    workingList = list()
 
     def __init__(self):
-        pathfile = csv.reader(self.pathfile,dialect = 'excel')
-        cmdfile = csv.reader(self.cmdfile,dialect = 'excel')
+        pathfile = open('path.csv','rb')
+        cmdfile = open('path.csv','rb')
         pathreader = csv.reader(pathfile,dialect = 'excel')
         cmdreader = csv.reader(cmdfile,dialect = 'excel')
 
         #make csv dictionary
         self.pathDic = defaultdict(list)
         self.cmdDic = defaultdict(list)
-        for l,r,c in pathreader:
-            self.pathDic[l].append((int(c),r))
-        for pose,cmd in cmdreader:
-            self.cmdDic[pose].append(cmd)
+        for l,r,c,mtime in pathreader:
+            self.pathDic[l].append((int(c),r,mtime))
+        # for pose,cmd in cmdreader:
+            # self.cmdDic[pose].append(cmd)
 
         #initialize arm pose
-        self.armSerial.write(self.cmdDic['P0'])
+        # self.armSerial.write(self.cmdDic['P0'])
         self.position = 'P0'
+        self.status = 'available'
+
+        print 'status = ',self.status
+        print 'position = ', self.position
+        print self.pathDic
 
     def register(self,sub):
         self.subsciber = sub
@@ -41,18 +47,25 @@ class Arm:
     def moveDrink(self,start,destination):
         if start != self.position:
             self.moveToTarget(start)
+            self.moveTarget(start,destination)
+        else:
+            self.moveTarget(start,destination)
+        print self.workingList
+        (func,arg) = self.workingList.pop(0)
+        func(arg)
 
     def moveToTarget(self,targetPosition):
         path = self.calculatePath(self.position,targetPosition)
         for stop in path:
-            self.workingQueue.put((self.moveToNext,stop))
+            self.workingList.append((self.moveToNext,stop))
 
-    def moveTarget(self,destination):
-        path = self.calculatePath(self.position,destination)
-        self.workingQueue.put(self.grab,())
+    def moveTarget(self,start,destination):
+        path = self.calculatePath(start,destination)
+        self.workingList.append((self.grab,'grab'))
+        # print path
         for stop in path:
-            self.workingQueue.put(self.moveToTarget,stop)
-        self.workingQueue.put(self.release,())
+            self.workingList.append((self.moveToNext,stop))
+        self.workingList.append((self.release,'release'))
             
 
 
@@ -77,25 +90,62 @@ class Arm:
                 path.append(v1)
                 if v1 == t: return (cost, path)
 
-                for c, v2 in pathdic.get(v1, ()):
+                for c, v2, wtime in pathdic.get(v1, ()):
                     if v2 not in seen:
-                        dicpath = path[0:]
-                        heappush(q, (cost+c, v2, dicpath))
-                        dicpath = []
+                        path2 = path[0:]
+                        heappush(q, (cost+c, v2, path2))
+                        path2 = []
 
         return float("inf")
 
-    def grab(self):
-        return
+    def grab(self,cmd):
+        print cmd
+        if self.workingList != []:
+            (func,arg) = self.workingList.pop(0)
+            print 'from grab',func,arg
+            Timer(1,func,[arg]).start()
+        else:
+            self.status = 'available'
+            print 'job done!!'
+            return
+        
 
-    def release(self):
-        return
+    def release(self,cmd):
+        print cmd
+        if self.workingList != []:
+            (func,arg) = self.workingList.pop(0)
+            print 'from release',func,arg
+            Timer(1,func,[arg]).start()
+        else:
+            self.status = 'available'
+            print 'job done!!'
+            return
+        
 
     def moveToNext(self,destination):
-        self.armSerial.write(self.cmdDic[destination])
-        self.position = destination
-        if not self.workingQueue.empty():
-            Timer.
-        
+        print 'positoin = ',self.position
+        print 'destination = ',destination
+        if self.workingList != []:
+            (func,arg) = self.workingList.pop(0)
+        else:
+            self.status = 'available'
+            print 'job done!!'
+            print 'fuck me'
+            return
+        if self.position == destination:
+            print 'pass first station'
+            func(arg)
+            return
+        for c, v2, wtime in self.pathDic.get(self.position, ()):
+            if v2 == destination:
+                workingTime = float(wtime)
+                # self.armSerial.write(self.cmdDic[destination])
+                self.position = destination
+                print 'from Move func= ',func
+                print 'arg= ',arg,'workingTime = ',workingTime
+                t = Timer(workingTime,func,[arg])
+                t.start()
+                print 'moving to ',destination
+                return
         
 
