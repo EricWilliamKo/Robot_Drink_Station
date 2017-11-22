@@ -1,9 +1,7 @@
-
-
-
 import serial
 import time
 import csv
+from datetime import datetime
 from threading import Timer
 from collections import defaultdict
 from heapq import *
@@ -37,6 +35,7 @@ class Arm:
         print 'status = ',self.status
         print 'position = ', self.position
         print self.pathDic
+        print 'initialize complete!!'
 
     def register(self,sub):
         self.subsciber = sub
@@ -44,13 +43,22 @@ class Arm:
     def notifyController(self,msg):
         self.subsciber(msg)
 
+    def getcup(self):
+        self.status = 'working'
+        if self.position != 'S1':
+            self.moveToTarget('S1')
+            self.workingList.append((self.grab,'grab'))
+        (func,arg) = self.workingList.pop(0)
+        func(arg)
+
     def moveDrink(self,start,destination):
+        self.status = 'working'
         if start != self.position:
             self.moveToTarget(start)
             self.moveTarget(start,destination)
         else:
             self.moveTarget(start,destination)
-        print self.workingList
+        # print self.workingList
         (func,arg) = self.workingList.pop(0)
         func(arg)
 
@@ -100,6 +108,7 @@ class Arm:
 
     def grab(self,cmd):
         print cmd
+        print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
             print 'from grab',func,arg
@@ -112,6 +121,7 @@ class Arm:
 
     def release(self,cmd):
         print cmd
+        print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
             print 'from release',func,arg
@@ -130,7 +140,6 @@ class Arm:
         else:
             self.status = 'available'
             print 'job done!!'
-            print 'fuck me'
             return
         if self.position == destination:
             print 'pass first station'
@@ -139,6 +148,7 @@ class Arm:
         for c, v2, wtime in self.pathDic.get(self.position, ()):
             if v2 == destination:
                 workingTime = float(wtime)
+                print datetime.now().time()
                 # self.armSerial.write(self.cmdDic[destination])
                 self.position = destination
                 print 'from Move func= ',func

@@ -1,10 +1,12 @@
-
+from RobotStations.Arm import Arm
+from RobotStations.Station import Station
 
 class ProcessController:
 
     def __init__(self):
         self.waitingList = list()
         self.processingList = list()
+        self.arm = Arm()
 
     def getorder(self,neworders):
         for drink in neworders:
