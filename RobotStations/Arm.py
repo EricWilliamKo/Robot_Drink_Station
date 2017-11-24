@@ -9,15 +9,15 @@ from Queue import *
 
 class Arm:
     # armSerial = serial.Serial('/dev/arm',115200)
-    position = None
-    status = None
-    workingList = list()
+    
 
     def __init__(self):
         pathfile = open('path.csv','rb')
         cmdfile = open('path.csv','rb')
         pathreader = csv.reader(pathfile,dialect = 'excel')
         cmdreader = csv.reader(cmdfile,dialect = 'excel')
+        self.workingList = list()
+        self.processing_id = None
 
         #make csv dictionary
         self.pathDic = defaultdict(list)
@@ -37,11 +37,11 @@ class Arm:
         print self.pathDic
         print 'initialize complete!!'
 
-    def register(self,sub):
-        self.subsciber = sub
+    def register(self,notifyFunc):
+        self.notifyFunc = notifyFunc
     
-    def notifyController(self,msg):
-        self.subsciber(msg)
+    def notify(self,msg):
+        self.notifyFunc(msg)
 
     def getcup(self):
         self.status = 'working'
