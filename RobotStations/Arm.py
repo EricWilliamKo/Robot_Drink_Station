@@ -41,9 +41,10 @@ class Arm:
         self.notifyFunc = notifyFunc
     
     def notify(self,msg):
-        self.notifyFunc(msg)
+        self.notifyFunc(msg,self.processing_id)
 
     def getcup(self):
+        print 'get cup'
         self.status = 'working'
         if self.position != 'S1':
             self.moveToTarget('S1')
@@ -114,8 +115,9 @@ class Arm:
             print 'from grab',func,arg
             Timer(1,func,[arg]).start()
         else:
-            self.status = 'available'
+            self.status = 'waitfordropping'
             print 'job done!!'
+            self.notify('drop')
             return
         
 
@@ -129,6 +131,12 @@ class Arm:
         else:
             self.status = 'available'
             print 'job done!!'
+            if self.position == 'S5':
+                self.notify('seal')
+            elif self.position in ['L1','L2','L3']:
+                self.notify('lock')
+            else:
+                self.notify('fill')
             return
         
 
