@@ -16,14 +16,23 @@ class Station:
 
     def notify(self):
         print self.stationName,' done'
-        self.status = 'available' 
+        if self.stationName == 'cupdropper':
+            self.status = 'available' 
+        else:
+            self.status = 'done'
         self.notifyFunc(self.stationName,self.processing_id)
+
+    def getLocation(self):
+        locationDic = {'cupdropper':'S1','ingredients':'S2','ice':'S3','black_tea':'S4',
+                    'wm_tea':'S5','sealer':'S6'}
+        return locationDic[self.stationName]
 
     def work(self,vol):
         workFuncDic = {
             'cupdropper':self.drop,'ice':self.iceFilling,
             'ingredients':self.ingredientsFilling,'black_tea':self.blackTeaFilling,
             'wm_tea':self.wmTeaFilling,'sealer':self.seal }
+        self.status == 'working'
         workFuncDic[self.stationName](vol)
 
     def drop(self,vol):

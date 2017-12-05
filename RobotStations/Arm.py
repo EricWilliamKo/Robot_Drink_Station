@@ -43,6 +43,18 @@ class Arm:
     def notify(self,msg):
         self.notifyFunc(msg,self.processing_id)
 
+    def lockID(self,drink_id):
+        self.processing_id = drink_id
+
+    def cleanID(self):
+        self.processing_id = None
+
+    def isAvailable(self):
+        if self.status == 'available':
+            return True
+        else:
+            return False
+
     def getcup(self):
         print 'get cup'
         self.status = 'working'
@@ -51,6 +63,11 @@ class Arm:
             self.workingList.append((self.grab,'grab'))
         (func,arg) = self.workingList.pop(0)
         func(arg)
+
+    def toLocker(self,lockerLocation):
+        print 'to locker ',lockerLocation
+        self.status = 'working'
+        self.moveDrink('S6I',lockerLocation)
 
     def moveDrink(self,start,destination):
         self.status = 'working'
@@ -112,7 +129,7 @@ class Arm:
         print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
-            print 'from grab',func,arg
+            # print 'from grab',func,arg
             Timer(1,func,[arg]).start()
         else:
             self.status = 'waitfordropping'
@@ -126,23 +143,23 @@ class Arm:
         print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
-            print 'from release',func,arg
+            # print 'from release',func,arg
             Timer(1,func,[arg]).start()
         else:
             self.status = 'available'
             print 'job done!!'
-            if self.position == 'S5':
+            if self.position == 'S6':
                 self.notify('seal')
             elif self.position in ['L1','L2','L3']:
-                self.notify('lock')
+                self.notify('done')
             else:
                 self.notify('fill')
             return
         
 
     def moveToNext(self,destination):
-        print 'positoin = ',self.position
-        print 'destination = ',destination
+        # print 'positoin = ',self.position
+        # print 'destination = ',destination
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
         else:
@@ -159,11 +176,11 @@ class Arm:
                 print datetime.now().time()
                 # self.armSerial.write(self.cmdDic[destination])
                 self.position = destination
-                print 'from Move func= ',func
-                print 'arg= ',arg,'workingTime = ',workingTime
+                # print 'from Move func= ',func
+                # print 'arg= ',arg,'workingTime = ',workingTime
                 t = Timer(workingTime,func,[arg])
                 t.start()
-                print 'moving to ',destination
+                print self.processing_id, ' moving to ',destination
                 return
         
 

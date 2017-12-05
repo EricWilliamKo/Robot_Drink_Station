@@ -1,6 +1,7 @@
 from RobotStations.Arm import Arm
 from RobotStations.Station import Station
 from RobotStations.Drinks import Drink
+from RobotStations.LockerManager import LockerManager
 from threading import Timer
 
 class ProcessController:
@@ -12,6 +13,8 @@ class ProcessController:
 
         self.arm = Arm()
         self.arm.register(self.armNotification)
+
+        self.lockerManager = LockerManager()
 
         self.cupdropper = Station('cupdropper')
         self.iceStation = Station('ice')
@@ -25,8 +28,9 @@ class ProcessController:
         self.blackTeaStation.register(self.stationNotification)
         self.wmTeaStation.register(self.stationNotification)
         self.sealerStation.register(self.stationNotification)
-        self.stationDic = {'cupdropper':self.cupdropper,'ice':self.iceStation,
-                            'ingredients':self.ingredientsStation,'sealer':self.sealerStation}
+        self.stationDic = {'cupdropper':self.cupdropper,'ice':self.iceStation,'black_tea':self.blackTeaStation,
+                    'wm_tea':self.wmTeaStation,'ingredients':self.ingredientsStation,'sealer':self.sealerStation}
+        
 
     def getorder(self,neworders):
         print 'got order'
@@ -55,9 +59,10 @@ class ProcessController:
         station = self.stationDic[name]
         if station.stationName in ['ice','ingredients','black_tea','wm_tea']:
             drink.nextMove = 'move'
-        # elif station.stationName == 'seal':
-            # drink.nextMove = 'lock'
-        self.fromWaitingToProcess()
+        elif station.stationName == 'sealer':
+            drink.nextMove = 'lock'
+        if self.waitingList != []:
+            self.fromWaitingToProcess()
         self.scanArmMission()
         return
 
@@ -66,7 +71,13 @@ class ProcessController:
         print 'drink details', self.processingList[0].__dict__
         drink = next((i for i in self.processingList if i.id == drink_id), None)
         drink.nextMove = msg
-        self.arm.processing_id = None
+        
+        if self.arm.status != 'waitfordropping':
+            self.arm.cleanID()
+        if msg == 'done':
+            self.processingList.remove(drink)
+            self.scanArmMission()
+
         self.dropCheck()
         self.scanStationMission()
         return
@@ -81,46 +92,65 @@ class ProcessController:
         return
 
     def dropCheck(self):
-        if self.arm.status != 'available':
-            return
-        for drink in self.processingList:
-            if drink.nextMove == 'drop':
-                if self.stationDic[drink.manufacturingProcess[1]].status == 'available':
-                    if self.arm.status == 'available':
-                        self.arm.processing_id = drink.id
-                        self.arm.getcup()
+        if self.arm.isAvailable():
+            for drink in self.processingList:
+                if drink.nextMove == 'drop':
+                    if self.stationDic[drink.manufacturingProcess[1]].status == 'available':
+                        if self.arm.status == 'available':
+                            self.arm.lockID(drink.id)
+                            self.arm.getcup()
 
-    def scanArmMission(self):
-        if self.arm.status != 'available':
-            return
-        for drink in self.processingList:
-            if drink.nextMove == 'move':
-                nextStation = drink.manufacturingProcess[1]
-                thisStation = drink.manufacturingProcess[0]
-                if self.stationDic[nextStation].status == 'available':
-                    self.arm.processing_id = drink.id
-                    self.arm.moveDrink(thisStation,nextStation)
-                    self.stationDic[thisStation].status = 'available'
-                    self.stationDic[nextStation].status = 'working'
-                    drink.processingList.remove(thisStation)
-                    return
+    def scanArmMission(self): 
+        # print self.arm.status
+        if self.arm.isAvailable():
+            for drink in self.processingList:
+                print 'scan Arm ',drink.__dict__
+                if drink.nextMove == 'move':
+                    nextStation = self.stationDic[drink.manufacturingProcess[1]]
+                    thisStation = self.stationDic[drink.manufacturingProcess[0]]
+                    if nextStation.status == 'available':
+                        self.arm.lockID(drink.id)
+                        self.arm.moveDrink(thisStation.getLocation(),nextStation.getLocation())
+                        thisStation.status = 'available'
+                        nextStation.status = 'working'
+                        drink.manufacturingProcess.remove(thisStation.stationName)
+                        return
+                elif drink.nextMove == 'lock':
+                    if not self.lockerManager.isFull():
+                        self.arm.lockID(drink.id)
+                        locker = self.lockerManager.getEmptyLocker()
+                        locker.storeDrink(drink.id)
+                        self.sealerStation.status = 'available'
+                        drink.manufacturingProcess.remove('sealer')
+                        drink.nextMove = 'done'
+                        self.arm.toLocker(locker.getLocation())
+                        return
+                else:
+                    pass
         return
 
     def scanStationMission(self):
         for drink in self.processingList:
-            nextStation = drink.manufacturingProcess[1]
-            thisStation = self.stationDic[drink.manufacturingProcess[0]]
-            if drink.nextMove == 'drop':
-                self.arm.status == 'waitfordropping'
-                self.cupdropper.work(1)
-                print 'cup dropping'
-                Timer(3,self.arm.moveDrink,thisStation,nextStation)
-            if drink.nextMove == 'fill':
-                thisStation.processing_id = drink.id
-                thisStation.work(drink.getVolume(drink.manufacturingProcess[0]))
-            elif drink.nextMove == 'seal':
-                thisStation.processing_id = drink.id
-                thisStation.work(1)
+            try:
+                nextStation = self.stationDic[drink.manufacturingProcess[1]]
+            except:
+                pass
+            if drink.manufacturingProcess !=[]:
+                thisStation = self.stationDic[drink.manufacturingProcess[0]]
+                print drink.__dict__
+                if drink.nextMove == 'drop':
+                    print 'status = ',self.cupdropper.status
+                    if self.cupdropper.status == 'available' and self.arm.status == 'waitfordropping':
+                        self.cupdropper.work(1)
+                        Timer(3,self.arm.moveDrink,[thisStation.getLocation(),nextStation.getLocation()]).start()
+                        drink.manufacturingProcess.remove(thisStation.stationName)
+                        # drink.status = 'fill'
+                if drink.nextMove == 'fill':
+                    thisStation.processing_id = drink.id
+                    thisStation.work(drink.getVolume(thisStation.stationName))
+                elif drink.nextMove == 'seal':
+                    thisStation.processing_id = drink.id
+                    thisStation.work(1)
         return
 
 
