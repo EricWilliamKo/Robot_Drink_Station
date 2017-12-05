@@ -6,13 +6,12 @@ import cherrypy
 import json
 import time
 from RobotStations.Drinks import Drink
-from RobotStations.Arm import Arm
-from ProcessController import ProcessController
+from processController import ProcessController
 
-class RobotStationServer():
-    arm = Arm()
-    processController = ProcessController()
-    orderList = []
+class RobotStationServer:
+
+    def __init__(self):
+        self.processController = ProcessController()
 
     @cherrypy.expose
     def index(self):
@@ -21,12 +20,25 @@ class RobotStationServer():
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def order(self):
+        orderList = []
         orderdata = cherrypy.request.json
         for drinkinfo in orderdata['orderList']:
             drink = Drink(**drinkinfo)
-            self.orderList.append(drink)
+            orderList.append(drink)
+            print drink.__dict__
 
+        self.processController.getorder(orderList)
+        print orderList
         return 'order recivied'
+
+    @cherrypy.expose
+    def getProcess(self):
+        info = 'processing list = '
+        for drink in self.processController.getProcessingList():
+            info += str(drink.__dict__)
+            
+        return info
+
 
 severconf = os.path.join(os.path.dirname(__file__), 'cherrypy.conf')
 

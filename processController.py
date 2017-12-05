@@ -53,6 +53,11 @@ class ProcessController:
         self.fromWaitingToProcess()
         return
             
+    def getProcessingList(self):
+        return self.processingList
+
+    def getWaitingList(self):
+        return self.waitingList
 
     def stationNotification(self,name,drink_id):
         drink = next((i for i in self.processingList if i.id == drink_id), None)

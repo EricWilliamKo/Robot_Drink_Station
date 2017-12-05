@@ -1,4 +1,4 @@
 {"orderList":[
-    {"black_tea":"10", "ingredients":"shit", "ice":5,"sugar":5},
-    {"wm_tea":"0", "ingredients":"sperm", "ice":7,"sugar":10}
+    {"black_tea":10, "wm_tea":0,"ingredients":3, "ice":5,"sugar":5},
+    {"black_tea":0,"wm_tea":10, "ingredients":5, "ice":7,"sugar":10}
 ]}
