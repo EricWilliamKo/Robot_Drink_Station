@@ -1,11 +1,11 @@
-
+from RobotStations.Drinks import Drink
 
 class Locker:
 
     def __init__(self,number):
         self.status = 'empty'
         self.lockerNumber = number
-        self.drink_id = None
+        self.drink = Drink()
 
     def isEmpty(self):
         if self.status == 'empty':
@@ -13,10 +13,10 @@ class Locker:
         else:
             return False
 
-    def storeDrink(self,drink_id):
-        self.drink_id = drink_id
+    def storeDrink(self,drink):
+        self.drink = drink
         self.status = 'occupied'
-        print 'drink locked id = %d'%(drink_id)
+        print 'drink locked id = %d'%(drink.id)
         return
 
     def unlockDrink(self):
@@ -26,7 +26,7 @@ class Locker:
         return
 
     def getDrinkid(self):
-        return self.drink_id
+        return self.drink.id
 
     def getLocation(self):
         locationDic = {1:'L1',2:'L2',3:'L3'}

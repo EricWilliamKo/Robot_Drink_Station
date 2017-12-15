@@ -10,6 +10,7 @@ class Drink:
         self.black_tea = 0
         self.wm_tea = 0
         self.id = None
+        self.order_id = None
         self.manufacturingProcess = []
         self.__dict__.update(entries)
 

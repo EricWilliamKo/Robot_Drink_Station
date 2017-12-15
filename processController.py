@@ -82,6 +82,8 @@ class ProcessController:
         if msg == 'done':
             self.processingList.remove(drink)
             self.scanArmMission()
+            if self.orderComplete(drink.order_id):
+                self.lockerManager.orderComplete(drink.order_id)
 
         self.dropCheck()
         self.scanStationMission()
@@ -124,7 +126,7 @@ class ProcessController:
                     if not self.lockerManager.isFull():
                         self.arm.lockID(drink.id)
                         locker = self.lockerManager.getEmptyLocker()
-                        locker.storeDrink(drink.id)
+                        locker.storeDrink(drink)
                         self.sealerStation.status = 'available'
                         drink.manufacturingProcess.remove('sealer')
                         drink.nextMove = 'done'
@@ -157,6 +159,16 @@ class ProcessController:
                     thisStation.processing_id = drink.id
                     thisStation.work(1)
         return
+
+    def orderComplete(self,order_id):
+        complete = True
+        for drink in self.waitingList:
+            if drink.order_id == order_id:
+                complete = False
+        for drink in self.processingList:
+            if drink.order_id == order_id:
+                complete = False
+        return complete
 
 
     
