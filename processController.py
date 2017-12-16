@@ -91,6 +91,7 @@ class ProcessController:
 
     def fromWaitingToProcess(self):
         if self.cupdropper.status == 'available':
+            self.cupdropper.status = 'working'
             target = self.waitingList.pop(0)
             target.nextMove = 'drop'
             self.processingList.append(target)
@@ -104,6 +105,8 @@ class ProcessController:
                 if drink.nextMove == 'drop':
                     if self.stationDic[drink.manufacturingProcess[1]].status == 'available':
                         if self.arm.status == 'available':
+                            print drink.manufacturingProcess[1],self.stationDic[drink.manufacturingProcess[1]].status
+                            self.stationDic[drink.manufacturingProcess[1]].status = 'working'
                             self.arm.lockID(drink.id)
                             self.arm.getcup()
 
@@ -120,6 +123,7 @@ class ProcessController:
                         self.arm.moveDrink(thisStation.getLocation(),nextStation.getLocation())
                         thisStation.status = 'available'
                         nextStation.status = 'working'
+                        print nextStation.stationName, nextStation.status
                         drink.manufacturingProcess.remove(thisStation.stationName)
                         return
                 elif drink.nextMove == 'lock':
@@ -147,10 +151,11 @@ class ProcessController:
                 print drink.__dict__
                 if drink.nextMove == 'drop':
                     print 'status = ',self.cupdropper.status
-                    if self.cupdropper.status == 'available' and self.arm.status == 'waitfordropping':
+                    if self.cupdropper.status == 'working' and self.arm.status == 'waitfordropping':
                         self.cupdropper.work(1)
                         Timer(3,self.arm.moveDrink,[thisStation.getLocation(),nextStation.getLocation()]).start()
                         drink.manufacturingProcess.remove(thisStation.stationName)
+                        self.cupdropper.status = 'available'
                         # drink.status = 'fill'
                 if drink.nextMove == 'fill':
                     thisStation.processing_id = drink.id
