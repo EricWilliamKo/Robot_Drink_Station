@@ -21,8 +21,12 @@ class Locker:
 
     def unlockDrink(self):
         self.drink_id = None
-        self.status = 'empty'
+        self.status = 'waiting'
         print 'unlock locker %d'%(self.lockerNumber)
+        return
+
+    def emptyNow(self):
+        self.status = 'empty'
         return
 
     def getDrinkid(self):

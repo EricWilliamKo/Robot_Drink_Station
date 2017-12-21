@@ -153,10 +153,11 @@ class ProcessController:
                     print 'status = ',self.cupdropper.status
                     if self.cupdropper.status == 'working' and self.arm.status == 'waitfordropping':
                         self.cupdropper.work(1)
-                        Timer(3,self.arm.moveDrink,[thisStation.getLocation(),nextStation.getLocation()]).start()
+                        t = Timer(3,self.arm.moveDrink,[thisStation.getLocation(),nextStation.getLocation()])
+                        t.daemon = True
+                        t.start()
                         drink.manufacturingProcess.remove(thisStation.stationName)
                         self.cupdropper.status = 'available'
-                        # drink.status = 'fill'
                 if drink.nextMove == 'fill':
                     thisStation.processing_id = drink.id
                     thisStation.work(drink.getVolume(thisStation.stationName))

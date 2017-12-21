@@ -12,8 +12,8 @@ class Arm:
     
 
     def __init__(self):
-        pathfile = open('path.csv','rb')
-        cmdfile = open('path.csv','rb')
+        pathfile = open('arm_path.csv','rb')
+        cmdfile = open('position.csv','rb')
         pathreader = csv.reader(pathfile,dialect = 'excel')
         cmdreader = csv.reader(cmdfile,dialect = 'excel')
         self.workingList = list()
@@ -21,11 +21,11 @@ class Arm:
 
         #make csv dictionary
         self.pathDic = defaultdict(list)
-        self.cmdDic = defaultdict(list)
+        self.cmdDic = {}
         for l,r,c,mtime in pathreader:
             self.pathDic[l].append((int(c),r,mtime))
-        # for pose,cmd in cmdreader:
-            # self.cmdDic[pose].append(cmd)
+        for pose,cmd in cmdreader:
+            self.cmdDic[pose] = cmd
 
         #initialize arm pose
         # self.armSerial.write(self.cmdDic['P0'])
@@ -35,6 +35,7 @@ class Arm:
         print 'status = ',self.status
         print 'position = ', self.position
         print self.pathDic
+        print self.cmdDic
         print 'initialize complete!!'
 
     def register(self,notifyFunc):
@@ -124,13 +125,21 @@ class Arm:
 
         return float("inf")
 
+    def sendArmCmd(self,destination,workingTime):
+        end = '\r\n'
+        pose = self.cmdDic[destination]
+        command = pose + 'T' + workingTime + end
+        print command
+
     def grab(self,cmd):
         print cmd
         print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
             # print 'from grab',func,arg
-            Timer(1,func,[arg]).start()
+            t = Timer(1,func,[arg])
+            t.daemon = True
+            t.start()
         else:
             self.status = 'waitfordropping'
             print 'job done!!'
@@ -144,7 +153,9 @@ class Arm:
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
             # print 'from release',func,arg
-            Timer(1,func,[arg]).start()
+            t = Timer(1,func,[arg])
+            t.daemon = True
+            t.start()
         else:
             self.status = 'available'
             print 'job done!!'
@@ -172,13 +183,13 @@ class Arm:
             return
         for c, v2, wtime in self.pathDic.get(self.position, ()):
             if v2 == destination:
-                workingTime = float(wtime)
+                workingTime = float(wtime)/1000
                 print datetime.now().time()
+                self.sendArmCmd(destination,wtime)
                 # self.armSerial.write(self.cmdDic[destination])
                 self.position = destination
-                # print 'from Move func= ',func
-                # print 'arg= ',arg,'workingTime = ',workingTime
                 t = Timer(workingTime,func,[arg])
+                t.daemon = True
                 t.start()
                 print self.processing_id, ' moving to ',destination
                 return

@@ -37,30 +37,42 @@ class Station:
 
     def drop(self,vol):
         print 'cup dropping'
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return
 
     def blackTeaFilling(self,vol):
         print 'black tea filling ',str(vol)
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return
 
     def wmTeaFilling(self,vol):
         print 'winter melon tea filling ',str(vol)
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return
 
     def iceFilling(self,vol):
         print 'ice filling ',str(vol)
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return
 
     def ingredientsFilling(self,vol):
         print 'ingredients filling ',str(vol)
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return
 
     def seal(self,vol):
         print 'sealing cup'
-        Timer(1,self.notify).start()
+        t = Timer(1,self.notify)
+        t.daemon = True
+        t.start()
         return

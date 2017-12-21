@@ -77,6 +77,9 @@ class LockerManager:
                 for locker in self.lockerList:
                     if locker.drink.order_id == order_id:
                         locker.unlockDrink()
+                        t = Timer(3,locker.emptyNow)
+                        t.daemon = True
+                        t.start()
                         inputError = False
         
         if inputError:
