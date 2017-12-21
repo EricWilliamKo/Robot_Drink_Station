@@ -8,10 +8,11 @@ from heapq import *
 from Queue import *
 
 class Arm:
-    # armSerial = serial.Serial('/dev/arm',115200)
+    
     
 
     def __init__(self):
+        self.armSerial = serial.Serial('/dev/arm',115200)
         pathfile = open('arm_path.csv','rb')
         cmdfile = open('position.csv','rb')
         pathreader = csv.reader(pathfile,dialect = 'excel')
@@ -27,8 +28,9 @@ class Arm:
         for pose,cmd in cmdreader:
             self.cmdDic[pose] = cmd
 
-        #initialize arm pose
+        # initialize arm pose
         # self.armSerial.write(self.cmdDic['P0'])
+        self.sendArmCmd('P0','1000')
         self.position = 'P0'
         self.status = 'available'
 
@@ -129,6 +131,7 @@ class Arm:
         end = '\r\n'
         pose = self.cmdDic[destination]
         command = pose + 'T' + workingTime + end
+        self.armSerial.write(command)
         print command
 
     def grab(self,cmd):
