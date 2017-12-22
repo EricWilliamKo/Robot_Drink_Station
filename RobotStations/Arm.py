@@ -29,7 +29,6 @@ class Arm:
             self.cmdDic[pose] = cmd
 
         # initialize arm pose
-        # self.armSerial.write(self.cmdDic['P0'])
         self.sendArmCmd('P0','1000')
         self.position = 'P0'
         self.status = 'available'
@@ -79,7 +78,6 @@ class Arm:
             self.moveTarget(start,destination)
         else:
             self.moveTarget(start,destination)
-        # print self.workingList
         (func,arg) = self.workingList.pop(0)
         func(arg)
 
@@ -91,10 +89,12 @@ class Arm:
     def moveTarget(self,start,destination):
         path = self.calculatePath(start,destination)
         self.workingList.append((self.grab,'grab'))
-        # print path
         for stop in path:
             self.workingList.append((self.moveToNext,stop))
         self.workingList.append((self.release,'release'))
+
+    def goHome(self):
+        self.moveTarget(self.position,'P0')
             
 
 
@@ -135,11 +135,11 @@ class Arm:
         print command
 
     def grab(self,cmd):
+        self.sendArmCmd(cmd,'1000')
         print cmd
         print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
-            # print 'from grab',func,arg
             t = Timer(1,func,[arg])
             t.daemon = True
             t.start()
@@ -151,11 +151,11 @@ class Arm:
         
 
     def release(self,cmd):
+        self.sendArmCmd(cmd,'1000')
         print cmd
         print datetime.now().time()        
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
-            # print 'from release',func,arg
             t = Timer(1,func,[arg])
             t.daemon = True
             t.start()
@@ -172,8 +172,6 @@ class Arm:
         
 
     def moveToNext(self,destination):
-        # print 'positoin = ',self.position
-        # print 'destination = ',destination
         if self.workingList != []:
             (func,arg) = self.workingList.pop(0)
         else:

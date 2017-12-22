@@ -12,14 +12,14 @@ from Locker import Locker
 
 class LockerManager:
 
-    def __init__(self):
-        self.locker1 = Locker(1)
-        self.locker2 = Locker(2)
-        self.locker3 = Locker(3)
+    def __init__(self,serialLED):
+        self.locker1 = Locker(1,serialLED)
+        self.locker2 = Locker(2,serialLED)
+        self.locker3 = Locker(3,serialLED)
         self.lockerList = [self.locker1,self.locker2,self.locker3]
         self.completedOrder = []
         self.processingOrder = []
-        # self.connectMega()
+        self.connectMega()
         print 'locker ready'
 
     def read_from_port(self,ser):
@@ -36,7 +36,7 @@ class LockerManager:
 
     def connectMega(self):
         self.megaConnected = True
-        megaSerial = serial.Serial('/dev/mega',9600)
+        megaSerial = serial.Serial('/dev/mega_LCD',9600)
         serilThread = threading.Thread(target=self.read_from_port,args=(megaSerial,))
         serilThread.start()
 

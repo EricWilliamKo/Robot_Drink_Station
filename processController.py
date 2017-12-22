@@ -3,6 +3,7 @@ from RobotStations.Station import Station
 from RobotStations.Drinks import Drink
 from RobotStations.LockerManager import LockerManager
 from threading import Timer
+import serial
 
 class ProcessController:
 
@@ -13,15 +14,16 @@ class ProcessController:
 
         self.arm = Arm()
         self.arm.register(self.armNotification)
+        
+        self.stationSerial = serial.Serial("/dev/mega_station",9600)
+        self.lockerManager = LockerManager(self.stationSerial)
 
-        self.lockerManager = LockerManager()
-
-        self.cupdropper = Station('cupdropper')
-        self.iceStation = Station('ice')
-        self.ingredientsStation = Station('ingredients')
-        self.blackTeaStation = Station('black_tea')
-        self.wmTeaStation = Station('wm_tea')
-        self.sealerStation = Station('sealer')
+        self.cupdropper = Station('cupdropper',self.stationSerial)
+        self.iceStation = Station('ice',self.stationSerial)
+        self.ingredientsStation = Station('ingredients',self.stationSerial)
+        self.blackTeaStation = Station('black_tea',self.stationSerial)
+        self.wmTeaStation = Station('wm_tea',self.stationSerial)
+        self.sealerStation = Station('sealer',self.stationSerial)
         self.cupdropper.register(self.stationNotification)
         self.iceStation.register(self.stationNotification)
         self.ingredientsStation.register(self.stationNotification)
@@ -84,6 +86,7 @@ class ProcessController:
             self.scanArmMission()
             if self.orderComplete(drink.order_id):
                 self.lockerManager.orderComplete(drink.order_id)
+                self.arm.goHome()
 
         self.dropCheck()
         self.scanStationMission()

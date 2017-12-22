@@ -2,10 +2,11 @@ from RobotStations.Drinks import Drink
 
 class Locker:
 
-    def __init__(self,number):
+    def __init__(self,number,serLED):
         self.status = 'empty'
         self.lockerNumber = number
         self.drink = Drink()
+        self.serialLED = serLED
 
     def isEmpty(self):
         if self.status == 'empty':
@@ -20,12 +21,18 @@ class Locker:
         return
 
     def unlockDrink(self):
+        ledDic = {1:'72',2:'74',3:'76'}
+        cmd = 'S' + ledDic[self.lockerNumber] + 'E'
+        self.serialLED.write(cmd)
         self.drink_id = None
         self.status = 'waiting'
         print 'unlock locker %d'%(self.lockerNumber)
         return
 
     def emptyNow(self):
+        ledDic = {1:'71',2:'73',3:'75'}
+        cmd = 'S' + ledDic[self.lockerNumber] + 'E'
+        self.serialLED.write(cmd)
         self.status = 'empty'
         return
 

@@ -4,12 +4,13 @@ from threading import Timer
 class Station:
 
 
-    def __init__(self,stationName):
+    def __init__(self,stationName,ser):
         self.status = 'available'
         self.remain = 100
         self.drink = None
         self.stationName = stationName
         self.processing_id = None
+        self.stationSerial = ser
     
     def register(self,notifyFunc):
         self.notifyFunc = notifyFunc
@@ -37,12 +38,22 @@ class Station:
 
     def drop(self,vol):
         print 'cup dropping'
+        self.stationSerial.write('S11E')
         t = Timer(1,self.notify)
         t.daemon = True
         t.start()
         return
 
     def blackTeaFilling(self,vol):
+        if vol <= 10 and vol > 8:
+            self.stationSerial.write('S41E')
+        elif vol <= 8 and vol > 5:
+            self.stationSerial.write('S42E')
+        elif vol <= 5 and vol > 3:
+            self.stationSerial.write('S43E')
+        elif vol <= 3 and vol > 1:
+            self.stationSerial.write('S44E')
+
         print 'black tea filling ',str(vol)
         t = Timer(1,self.notify)
         t.daemon = True
@@ -50,6 +61,15 @@ class Station:
         return
 
     def wmTeaFilling(self,vol):
+        if vol <= 10 and vol > 8:
+            self.stationSerial.write('S51E')
+        elif vol <= 8 and vol > 5:
+            self.stationSerial.write('S52E')
+        elif vol <= 5 and vol > 3:
+            self.stationSerial.write('S53E')
+        elif vol <= 3 and vol > 1:
+            self.stationSerial.write('S54E')
+            
         print 'winter melon tea filling ',str(vol)
         t = Timer(1,self.notify)
         t.daemon = True
@@ -57,6 +77,11 @@ class Station:
         return
 
     def iceFilling(self,vol):
+        if vol == 10:
+            self.stationSerial.write('S39E')
+        elif vol == 5:
+            self.stationSerial.write('S33E')
+
         print 'ice filling ',str(vol)
         t = Timer(1,self.notify)
         t.daemon = True
@@ -64,6 +89,7 @@ class Station:
         return
 
     def ingredientsFilling(self,vol):
+        self.stationSerial.write('S21E')
         print 'ingredients filling ',str(vol)
         t = Timer(1,self.notify)
         t.daemon = True
