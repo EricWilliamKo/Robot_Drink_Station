@@ -36,8 +36,8 @@ class LockerManager:
 
     def connectMega(self):
         self.megaConnected = True
-        megaSerial = serial.Serial('/dev/mega_LCD',9600)
-        serilThread = threading.Thread(target=self.read_from_port,args=(megaSerial,))
+        self.megaSerial = serial.Serial('/dev/mega_LCD',9600)
+        serilThread = threading.Thread(target=self.read_from_port,args=(self.megaSerial,))
         serilThread.start()
 
     def disConnectMega(self):
@@ -69,6 +69,7 @@ class LockerManager:
         for order_id in self.processingOrder:
             if order_id == inputNum:
                 inputError = False
+                self.megaSerial.write('S2E')
                 print 'Youe order is still processing, please wait a moment'
                 return
 
@@ -77,15 +78,17 @@ class LockerManager:
                 for locker in self.lockerList:
                     if locker.drink.order_id == order_id:
                         locker.unlockDrink()
-                        t = Timer(3,locker.emptyNow)
+                        t = Timer(5,locker.emptyNow)
                         t.daemon = True
                         t.start()
                         inputError = False
         
         if inputError:
             print 'input error'
+            self.megaSerial.write('S1E')
             return
         else:
             print 'Please take your drinks'
+            self.megaSerial.write('S0E')
             self.completedOrder.remove(inputNum)
             return

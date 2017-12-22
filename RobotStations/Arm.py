@@ -95,7 +95,8 @@ class Arm:
 
     def goHome(self):
         self.moveTarget(self.position,'P0')
-            
+        (func,arg) = self.workingList.pop(0)
+        func(arg)
 
 
     def calculatePath(self,start,destination):

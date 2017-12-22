@@ -74,8 +74,8 @@ class ProcessController:
         return
 
     def armNotification(self,msg,drink_id):
-        print 'drink id ', str(drink_id)
-        print 'drink details', self.processingList[0].__dict__
+        # print 'drink id ', str(drink_id)
+        # print 'drink details', self.processingList[0].__dict__
         drink = next((i for i in self.processingList if i.id == drink_id), None)
         drink.nextMove = msg
         

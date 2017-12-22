@@ -23,6 +23,7 @@ class Locker:
     def unlockDrink(self):
         ledDic = {1:'72',2:'74',3:'76'}
         cmd = 'S' + ledDic[self.lockerNumber] + 'E'
+        print cmd
         self.serialLED.write(cmd)
         self.drink_id = None
         self.status = 'waiting'
@@ -33,6 +34,7 @@ class Locker:
         ledDic = {1:'71',2:'73',3:'75'}
         cmd = 'S' + ledDic[self.lockerNumber] + 'E'
         self.serialLED.write(cmd)
+        print cmd
         self.status = 'empty'
         return
 
