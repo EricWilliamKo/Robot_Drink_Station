@@ -1,21 +1,39 @@
 #!/usr/bin/env python
 import serial
 import time
+import threading
 
 armSerial = serial.Serial("/dev/arm",115200)
 
-def moveArm(cmd):
+def moveArm():
+    cmd = '#1P1800T1000\r\n#1P1500T1000\r\n'
+    armSerial.write(cmd)
+    print cmd
+
+def sendCmd(cmd):
     end = '\r\n'
     armSerial.write(cmd+end)
-    print cmd
+
+def move2():
+    end = '\r\n'
+    cmd = '#1P1800T1000\r\n'
+    cmd2 = '#1P1500T1000\r\n'
+    armSerial.write(cmd+end)
+    time.sleep(1)
+    armSerial.write(cmd2+end)
+    time.sleep(1)
+    print 'done'
+
 
 
 if __name__ == '__main__':
     time.sleep(1)
-    cmd = '#1P800#2P1500#3P2300#4P800#5P1500#6P1350T3000'
-    cmd2 = '#1P800#2P1000#3P2300#4P800#5P1500#6P1350T3000'
-    moveArm(cmd)
-    wait = float(cmd[cmd.index('T')+1:])/1000
-    time.sleep(wait)
-    moveArm(cmd2)
+
+    moveArm()
+
+    serialThread = threading.Thread(target = move2)
+    serialThread.daemon = True
+    serialThread.start()
+
+    
     
