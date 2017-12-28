@@ -15,7 +15,7 @@ class ProcessController:
         self.arm = Arm()
         self.arm.register(self.armNotification)
         
-        self.stationSerial = serial.Serial("/dev/mega_station",9600)
+        self.stationSerial = serial.Serial("/dev/ttyACM0",9600)
         self.lockerManager = LockerManager(self.stationSerial)
 
         self.cupdropper = Station('cupdropper',self.stationSerial)
@@ -77,8 +77,12 @@ class ProcessController:
         # print 'drink id ', str(drink_id)
         # print 'drink details', self.processingList[0].__dict__
         drink = next((i for i in self.processingList if i.id == drink_id), None)
+
+        if drink == None:
+            print 'its home'
+            return
+
         drink.nextMove = msg
-        
         if self.arm.status != 'waitfordropping':
             self.arm.cleanID()
         if msg == 'done':
@@ -90,6 +94,8 @@ class ProcessController:
 
         self.dropCheck()
         self.scanStationMission()
+        # if self.arm.isAvailable():
+            # self.scanArmMission()
         return
 
     def fromWaitingToProcess(self):
@@ -124,6 +130,7 @@ class ProcessController:
                     if nextStation.status == 'available':
                         self.arm.lockID(drink.id)
                         self.arm.moveDrink(thisStation.getLocation(),nextStation.getLocation())
+                        print '!!!!arm status =',self.arm.status
                         thisStation.status = 'available'
                         nextStation.status = 'working'
                         print nextStation.stationName, nextStation.status
@@ -153,10 +160,11 @@ class ProcessController:
                 thisStation = self.stationDic[drink.manufacturingProcess[0]]
                 print drink.__dict__
                 if drink.nextMove == 'drop':
-                    print 'status = ',self.cupdropper.status
+                    print 'cupdropper status = ',self.cupdropper.status
+                    print 'arm status =',self.arm.status
                     if self.cupdropper.status == 'working' and self.arm.status == 'waitfordropping':
                         self.cupdropper.work(1)
-                        t = Timer(3,self.arm.moveDrink,[thisStation.getLocation(),nextStation.getLocation()])
+                        t = Timer(3,self.arm.pullcup,[nextStation.getLocation()])
                         t.daemon = True
                         t.start()
                         drink.manufacturingProcess.remove(thisStation.stationName)

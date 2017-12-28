@@ -19,7 +19,7 @@ class LockerManager:
         self.lockerList = [self.locker1,self.locker2,self.locker3]
         self.completedOrder = []
         self.processingOrder = []
-        self.connectMega()
+        # self.connectMega()
         print 'locker ready'
 
     def read_from_port(self,ser):
