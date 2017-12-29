@@ -15,7 +15,7 @@ class ProcessController:
         self.arm = Arm()
         self.arm.register(self.armNotification)
         
-        self.stationSerial = serial.Serial("/dev/ttyACM0",9600)
+        self.stationSerial = serial.Serial("/dev/mega_station",9600)
         self.lockerManager = LockerManager(self.stationSerial)
 
         self.cupdropper = Station('cupdropper',self.stationSerial)
@@ -104,7 +104,7 @@ class ProcessController:
             target = self.waitingList.pop(0)
             target.nextMove = 'drop'
             self.processingList.append(target)
-            print 'processingList ',self.processingList
+            # print 'processingList ',self.processingList
             self.dropCheck()
         return
 
@@ -114,7 +114,7 @@ class ProcessController:
                 if drink.nextMove == 'drop':
                     if self.stationDic[drink.manufacturingProcess[1]].status == 'available':
                         if self.arm.status == 'available':
-                            print drink.manufacturingProcess[1],self.stationDic[drink.manufacturingProcess[1]].status
+                            # print drink.manufacturingProcess[1],self.stationDic[drink.manufacturingProcess[1]].status
                             self.stationDic[drink.manufacturingProcess[1]].status = 'working'
                             self.arm.lockID(drink.id)
                             self.arm.getcup()
@@ -130,10 +130,10 @@ class ProcessController:
                     if nextStation.status == 'available':
                         self.arm.lockID(drink.id)
                         self.arm.moveDrink(thisStation.getLocation(),nextStation.getLocation())
-                        print '!!!!arm status =',self.arm.status
+                        # print '!!!!arm status =',self.arm.status
                         thisStation.status = 'available'
                         nextStation.status = 'working'
-                        print nextStation.stationName, nextStation.status
+                        # print nextStation.stationName, nextStation.status
                         drink.manufacturingProcess.remove(thisStation.stationName)
                         return
                 elif drink.nextMove == 'lock':
@@ -158,10 +158,10 @@ class ProcessController:
                 pass
             if drink.manufacturingProcess !=[]:
                 thisStation = self.stationDic[drink.manufacturingProcess[0]]
-                print drink.__dict__
+                # print drink.__dict__
                 if drink.nextMove == 'drop':
-                    print 'cupdropper status = ',self.cupdropper.status
-                    print 'arm status =',self.arm.status
+                    # print 'cupdropper status = ',self.cupdropper.status
+                    # print 'arm status =',self.arm.status
                     if self.cupdropper.status == 'working' and self.arm.status == 'waitfordropping':
                         self.cupdropper.work(1)
                         t = Timer(3,self.arm.pullcup,[nextStation.getLocation()])

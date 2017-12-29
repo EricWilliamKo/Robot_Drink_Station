@@ -27,7 +27,7 @@ class Arm:
         
 
         # initialize arm pose
-        # self.sendArmCmd('P0','1000')
+        self.mm.toP0('1000')
         self.position = 'P0'
         self.status = 'available'
 
@@ -135,7 +135,7 @@ class Arm:
 
 
     def calculatePath(self,start,destination):
-        print 'cal path ' + start + 'to' + destination
+        # print 'cal path ' + start + 'to' + destination
         try:
             (cost,path) = self.dijkstra(self.pathDic,start,destination)
             print 'cost = ',cost

@@ -7,7 +7,7 @@ class MotionModule:
 
     def __init__(self):
         print 'motion module init'
-        # self.armSerial = serial.Serial('/dev/arm',115200)
+        self.armSerial = serial.Serial('/dev/arm',115200)
 
     def toGoal(self,goal,wtime):
         moveDic = {'P0':self.toP0,'P1':self.toP1,'P2':self.toP2,'P3':self.toP3,'P4':self.toP4,
@@ -271,6 +271,7 @@ class MotionModule:
         end = '\r\n'
         for i, cmd in enumerate(cmds):
             print cmd
+            self.armSerial.write(cmd)
             workingtime = float(cmd[cmd.index('T')+1:])/1000
             time.sleep(workingtime)
         
