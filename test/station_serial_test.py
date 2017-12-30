@@ -14,12 +14,12 @@ def stationWork(cmd):
 
 
 if __name__ == '__main__':
-    time.sleep(2)
-    cmd = '11'
+    time.sleep(7)
+    cmd = '81'
     cmd2 = '21'
-    cmd3 = '33'
-    cmd4 = '43'
-    cmd5 = '54'
+    cmd3 = '71'
+    cmd4 = '73'
+    cmd5 = '75'
     cmd6 = '72'
     cmd7 = '74'
     cmd8 = '76'
@@ -28,6 +28,10 @@ if __name__ == '__main__':
     # stationWork(cmd3)
     # stationWork(cmd4)
     # stationWork(cmd5)
-    stationWork(cmd6)
-    stationWork(cmd7)
-    stationWork(cmd8)
+    stationWork(cmd)
+    # stationWork(cmd7)
+    # stationWork(cmd8)
+    # time.sleep(5)
+    # stationWork(cmd3)
+    # stationWork(cmd4)
+    # stationWork(cmd5)

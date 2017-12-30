@@ -94,8 +94,8 @@ class ProcessController:
 
         self.dropCheck()
         self.scanStationMission()
-        # if self.arm.isAvailable():
-            # self.scanArmMission()
+        if self.arm.isAvailable():
+            self.scanArmMission()
         return
 
     def fromWaitingToProcess(self):

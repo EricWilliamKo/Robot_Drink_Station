@@ -45,33 +45,43 @@ class Station:
         return
 
     def blackTeaFilling(self,vol):
+        wtime = 1.0
         if vol <= 10 and vol > 8:
             self.stationSerial.write('S41E')
+            wtime = 28
         elif vol <= 8 and vol > 5:
             self.stationSerial.write('S42E')
+            wtime = 19
         elif vol <= 5 and vol > 3:
             self.stationSerial.write('S43E')
+            wtime = 15
         elif vol <= 3 and vol > 1:
             self.stationSerial.write('S44E')
+            wtime = 10
 
         print 'black tea filling ',str(vol)
-        t = Timer(1,self.notify)
+        t = Timer(wtime,self.notify)
         t.daemon = True
         t.start()
         return
 
     def wmTeaFilling(self,vol):
+        wtime = 1.0
         if vol <= 10 and vol > 8:
             self.stationSerial.write('S51E')
+            wtime = 28
         elif vol <= 8 and vol > 5:
             self.stationSerial.write('S52E')
+            wtime = 19
         elif vol <= 5 and vol > 3:
             self.stationSerial.write('S53E')
+            wtime = 15
         elif vol <= 3 and vol > 1:
             self.stationSerial.write('S54E')
+            wtime = 10
             
         print 'winter melon tea filling ',str(vol)
-        t = Timer(1,self.notify)
+        t = Timer(wtime,self.notify)
         t.daemon = True
         t.start()
         return
@@ -83,7 +93,7 @@ class Station:
             self.stationSerial.write('S33E')
 
         print 'ice filling ',str(vol)
-        t = Timer(1,self.notify)
+        t = Timer(2,self.notify)
         t.daemon = True
         t.start()
         return
@@ -91,7 +101,7 @@ class Station:
     def ingredientsFilling(self,vol):
         self.stationSerial.write('S21E')
         print 'ingredients filling ',str(vol)
-        t = Timer(1,self.notify)
+        t = Timer(2,self.notify)
         t.daemon = True
         t.start()
         return
